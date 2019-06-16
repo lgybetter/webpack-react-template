@@ -5,6 +5,7 @@
   "main": "index.js",
   "scripts": {
     "dev": "webpack-dev-server --config ./build/webpack.dev.config.js --color --progress --open",
+    "build:dev": "webpack --config ./build/webpack.dev.config.js --color --progress",
     "build": "webpack --config ./build/webpack.prod.config.js --color --progress",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
