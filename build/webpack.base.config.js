@@ -1,24 +1,28 @@
 const path = require('path')
 const webpack = require('webpack');
-const { CleanWebpackPlugin } = require('clean-webpack-plugin')
+
+// 模板注入
 const HtmlWebpackPlugin = require('html-webpack-plugin')
+
+// 样式抽离
 const MiniCssExtractPlugin = require('mini-css-extract-plugin')
 
+const HappyPack = require('happypack');
+const os = require('os');
+const HappyThreadPool = HappyPack.ThreadPool({ size: os.cpus().length })
+
 module.exports = {
-  mode: 'development',
-  devtool: 'cheap-module-eval-source-map', // dev
-  // devtool: 'cheap-module-source-map', // product
   entry: [
-    path.join(__dirname, 'src', 'index.js')
+    path.join(__dirname, '../', 'src', 'index.js')
   ],
   output: {
-    path: path.join(__dirname, 'dist'),
+    path: path.join(__dirname, '../', 'dist'),
     filename: 'bundle.js'
   },
   resolve: {
     extensions: ['.js', '.jsx'],
     alias: {
-      '@': path.join(__dirname, 'src')
+      '@': path.join(__dirname, '../', 'src')
     }
   },
   module: {
@@ -28,7 +32,8 @@ module.exports = {
         exclude: /node_modules/,
         use: [
           {
-            loader: 'babel-loader'
+            // loader: 'babel-loader'
+            loader: 'happypack/loader?id=babelconfig'
           }
         ]
       },
@@ -67,17 +72,10 @@ module.exports = {
       }
     ]
   },
-  optimization: {
-    splitChunks: {
-      chunks: 'all'
-    },
-    usedExports: true
-  },
   plugins: [
-    new CleanWebpackPlugin(),
     new HtmlWebpackPlugin({
       filename: 'index.html',
-      template: path.join(__dirname, 'template/index.html')
+      template: path.join(__dirname, '../', 'template', 'index.html')
     }),
     new MiniCssExtractPlugin({
       filename: '[name].css',
@@ -86,21 +84,10 @@ module.exports = {
     new webpack.ProvidePlugin({
       $: 'jquery', // npm
     }),
-    new webpack.DefinePlugin({
-      'process.env': {
-        VUEP_BASE_URL: JSON.stringify('http://localhost:9001')
-      }
-    })  
-  ],
-  devServer: {
-    hot: true,
-    contentBase: path.join(__dirname, './dist'),
-    host: '127.0.0.1',
-    port: 8080,
-    historyApiFallback: true, // 该选项的作用所有的404都连接到index.html
-    proxy: {
-      // 代理到后端api地址
-      '/api': 'http://localhost:9000'
-    }
-  }
+    new HappyPack({
+      id: 'babelconfig',
+      loaders: ['babel-loader?cacheDirectory'],
+      threadPool: HappyThreadPool
+    })
+  ]
 }

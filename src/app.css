@@ -1,3 +1,12 @@
 .content {
   color: #ddd;
 }
+
+/* css tree shaking */
+.test {
+  color: #fff;
+}
+
+.content {
+  color: #000;
+}
